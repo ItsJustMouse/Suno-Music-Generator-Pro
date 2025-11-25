@@ -1,0 +1,343 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Suno ReDuex Lyrics Model API",
+    "version": "1.0.0",
+    "description": "API for generating and submitting songs to Suno AI"
+  },
+  "servers": [
+    {
+      "url": "https://api.suno-redux.ai/v1",
+      "description": "Production server"
+    }
+  ],
+  "paths": {
+    "/generate-song": {
+      "post": {
+        "summary": "Generate a complete song",
+        "description": "Takes user inputs and generates a professionally formatted song for Suno AI",
+        "operationId": "generateSong",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SongRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully generated song",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SongResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/submit-to-suno": {
+      "post": {
+        "summary": "Submit song directly to Suno AI",
+        "description": "Submits a formatted song to Suno AI for generation",
+        "operationId": "submitToSuno",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SunoSubmission"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully submitted to Suno",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SunoResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid API key"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/genres": {
+      "get": {
+        "summary": "Get available genres and sub-genres",
+        "description": "Returns list of all available genres and their sub-genres",
+        "operationId": "getGenres",
+        "responses": {
+          "200": {
+            "description": "List of genres and sub-genres",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenreList"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/validate-format": {
+      "post": {
+        "summary": "Validate Suno formatting",
+        "description": "Checks if song format is valid for Suno AI",
+        "operationId": "validateFormat",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Validation result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SongRequest": {
+        "type": "object",
+        "required": ["title", "genre", "theme"],
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Song title"
+          },
+          "genre": {
+            "type": "string",
+            "description": "Main genre"
+          },
+          "subGenre": {
+            "type": "string",
+            "description": "Sub-genre (optional)"
+          },
+          "theme": {
+            "type": "string",
+            "description": "Song theme or concept"
+          },
+          "vocalGender": {
+            "type": "string",
+            "enum": ["male", "female", "duet", "instrumental"],
+            "description": "Vocal type"
+          },
+          "mood": {
+            "type": "string",
+            "description": "Desired mood"
+          }
+        }
+      },
+      "SongResponse": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "style": {
+            "type": "string",
+            "description": "Style description for Suno"
+          },
+          "vocals": {
+            "type": "string"
+          },
+          "lyrics": {
+            "type": "string",
+            "description": "Complete formatted lyrics section"
+          },
+          "characterCount": {
+            "type": "integer",
+            "description": "Total character count"
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "SunoSubmission": {
+        "type": "object",
+        "required": ["style", "lyrics"],
+        "properties": {
+          "style": {
+            "type": "string"
+          },
+          "lyrics": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "isInstrumental": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      },
+      "SunoResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "songId": {
+            "type": "string"
+          },
+          "sunoUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["queued", "processing", "completed", "failed"]
+          },
+          "estimatedTime": {
+            "type": "integer",
+            "description": "Estimated completion time in seconds"
+          }
+        }
+      },
+      "GenreList": {
+        "type": "object",
+        "properties": {
+          "genres": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Genre"
+            }
+          }
+        }
+      },
+      "Genre": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "subGenres": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "characteristics": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "ValidationRequest": {
+        "type": "object",
+        "required": ["lyrics"],
+        "properties": {
+          "lyrics": {
+            "type": "string"
+          },
+          "isInstrumental": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ValidationResponse": {
+        "type": "object",
+        "properties": {
+          "isValid": {
+            "type": "boolean"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "suggestions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key"
+      },
+      "OAuth2": {
+        "type": "oauth2",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://auth.suno-redux.ai/oauth/authorize",
+            "tokenUrl": "https://auth.suno-redux.ai/oauth/token",
+            "scopes": {
+              "generate": "Generate songs",
+              "submit": "Submit to Suno AI",
+              "validate": "Validate formatting"
+            }
+          }
+        }
+      }
+    }
+  }
+}
