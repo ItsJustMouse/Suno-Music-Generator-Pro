@@ -144,9 +144,9 @@ Common errors and solutions:
 - Privacy Policy: privacy_policy.md
 
 ### Contact
-- Technical Support: support@suno-redux.ai
-- Privacy Inquiries: privacy@suno-redux.ai
-- Feature Requests: feedback@suno-redux.ai
+- Technical Support: support.smgp@proton.me
+- Privacy Inquiries: support.smgp@proton.me
+- Feature Requests: support.smgp@proton.me
 
 ## Launch Checklist
 
